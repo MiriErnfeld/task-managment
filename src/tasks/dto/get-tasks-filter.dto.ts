@@ -1,8 +1,8 @@
-import { from } from "rxjs";
-import { TaskStatus } from "../tasks.model";
-import {IsOptional, IsIn} from 'class-validator'
+import { TaskStatus } from '../task-status.enum';
+import { IsOptional } from 'class-validator';
 export class GetTasksTilterDto {
-    @IsOptional()
-    status: TaskStatus;
-    search: string
+  @IsOptional()
+  status: TaskStatus;
+  @IsOptional()
+  search: string;
 }

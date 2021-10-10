@@ -17,5 +17,10 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "parserOptions": {
+    "project": "tsconfig.json",
+    "tsconfigRootDir": "__dirname",
+    "sourceType": "module",
+  },
 }
