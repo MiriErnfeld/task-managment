@@ -20,7 +20,7 @@ export class TasksController {
     @Query(ValidationPipe) filterDto: GetTasksTilterDto,
     @GetUser() user: User,
   ): Promise<Task[]> {
-    this.logger.verbose( `user ${user.username} get all tasks. filters : ${filterDto}`)
+    this.logger.verbose( `user ${user.username} get all tasks. filters : ${JSON.stringify(filterDto)}`)
     return this.tasksService.getTasks(filterDto, user);
   }
 
