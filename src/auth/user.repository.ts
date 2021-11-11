@@ -1,42 +1,63 @@
-import { Repository, EntityRepository } from 'typeorm';
-import { ConflictException, InternalServerErrorException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { User } from './user.entity';
-import { AuthCredentialsDto } from './dto/auto-credentials.dto';
+import { ConflictException, InternalServerErrorException } from "@nestjs/common";
+import { BaseEntity, EntityRepository, Repository } from "typeorm";
+import * as bcrypt from "bcrypt";
+import { AuthCredentialsDto } from "./dto/auth-cridantiols.dto";
+import { User } from "./user.entity";
+
 
 @EntityRepository(User)
-export class UserRepository extends Repository<User> {
-  async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const { username, password } = authCredentialsDto;
+export class UserRepository extends Repository<User>{
+    async signup(authCredentialsDto: AuthCredentialsDto): Promise<void> {
+        const { username, password } = authCredentialsDto;
+        console.log("in repository");
 
-    const user = this.create();
-    user.username = username;
-    user.salt = await bcrypt.genSalt();
-    user.password = await this.hashPassword(password, user.salt);
+        const user = new User();
+        user.username = username;
+        user.salt = await bcrypt.genSalt();
+        console.log(user.salt);
 
-    try {
-      await user.save();
-    } catch (error) {
-      if (error.code === '23505') { // duplicate username
-        throw new ConflictException('Username already exists');
-      } else {
-        throw new InternalServerErrorException();
+        user.password = await this.hushPassword(password, user.salt);
+        console.log("before try!");
+
+        try {
+            await user.save();
+            console.log(user);
+
+        } catch (error) {
+            console.log(error.code);//not working
+            if (error.code === 23505) { //duplicatad username
+                throw new ConflictException('username already exist')
+            }
+            else {
+                console.log("in else");
+
+                throw new InternalServerErrorException()
+            }
+
+        }
+
+
+    }
+
+    async validateUserPassword(authCredentialsDto: AuthCredentialsDto): Promise<string> {
+        const { username, password } = authCredentialsDto
+      const user=await this.findOne({username})
+      if(user && await user.valitaPassword(password)) {
+          return user.username
       }
+      else{
+          return null;
+      }
+
+
     }
-  }
 
-  async validateUserPassword(authCredentialsDto: AuthCredentialsDto): Promise<string> {
-    const { username, password } = authCredentialsDto;
-    const user = await this.findOne({ username });
+    private async hushPassword(password: string, salt: string): Promise<string> {
+        console.log("in password function");
+        const t = bcrypt.hash(password, salt)
+        console.log(t);
 
-    if (user && await user.validatePassword(password)) {
-      return user.username;
-    } else {
-      return null;
+        return t
     }
-  }
 
-  private async hashPassword(password: string, salt: string): Promise<string> {
-    return bcrypt.hash(password, salt);
-  }
 }
